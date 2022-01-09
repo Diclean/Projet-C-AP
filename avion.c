@@ -25,12 +25,15 @@ struct Liste_Compagnie
 
 avion addAvionTK(int time){
     avion Avion1;
+    printf("\033[%d;%dH", 35, 65);
     printf("Immatriculation du véhicule: ");
     scanf("%s", Avion1.identifiant);
+    printf("\033[%d;%dH", 36, 65);
     printf("Depart dans : ");
     scanf("%d",&Avion1.heure);
     while(Avion1.heure<=time){
-        printf("C'est trop tard\n");
+        printf("\033[%d;%dH", 37, 65);
+        printf("C'est trop tard!! ");
         printf("Entrez un nouvelle horaire xx:xx : ");
         scanf("%d:%d", &Avion1.heure);
     }
@@ -41,15 +44,20 @@ avion addAvionTK(int time){
 
 avion addAvionLand(int time){
     avion Avion1;
+    printf("\033[%d;%dH", 35, 65);
     printf("Immatriculation du véhicule: ");
     scanf("%s", Avion1.identifiant);
+    printf("\033[%d;%dH", 36, 65);
     printf("Niveau de Fuel : ");
     scanf("%d",&Avion1.carburant);
+    printf("\033[%d;%dH", 37, 65);
     printf("Consomation en vol : ");
     scanf("%d",&Avion1.consommation);
+    printf("\033[%d;%dH", 38, 65);
     printf("Heure d'attérissage dans : ");
     scanf("%d",&Avion1.heure);
     while(Avion1.heure<=time){
+        printf("\033[%d;%dH", 39, 65);
         printf("C'est déjà passé\n");
         printf("Entrez de nouveau le timer : ");
         scanf("%d", &Avion1.heure);
@@ -61,28 +69,36 @@ avion addAvionLand(int time){
 
 void insert_depart(avion avion1)
 {
+    FILE * f;
+    f = fopen("file.txt","w");
    struct Depart *newDepart;
    newDepart = (struct Depart*)malloc(sizeof(struct Depart));
    newDepart->data = avion1;
    newDepart -> next_dep = NULL;
-   if(front_dep == NULL)
+   if(front_dep == NULL){
       front_dep = rear_dep = newDepart;
+   }
     else{
       if(newDepart->data.heure>front_dep->data.heure)
       {
           rear_dep -> next_dep = newDepart;
           rear_dep = newDepart;
+
       }
 
     if(newDepart->data.heure<front_dep->data.heure)
       {
           newDepart->next_dep=front_dep;
           front_dep=newDepart;
+
       }
       else{
           printf("Ce n'est pas possible\n");
+
+          
       }
       }
+
     }
 
 void insert_arriv(avion avion1)
@@ -189,15 +205,19 @@ void display_depart()
 
 //function which display the arrivals
 void display_arriv()
-{
+{  int X = 15, Y= 8;
+    printf("\033[%d;%dH", X, Y);
    if(front_arr == NULL)
-      printf("\nThere are no plane ready to land.\n");
+      printf("There are no plane ready to land.");
    else{
       struct Arrive *temp = front_arr;
-      while(temp->next_arr != NULL){
+      while(temp != NULL){
+            printf("\033[%d;%dH", X, Y);
             printf("%s-%c-%d-%d\n",temp->data.identifiant,temp->data.request,temp->data.carburant,temp->data.consommation);
             temp = temp -> next_arr;
+            X +=1; 
                                }
+        printf("\033[%d;%dH", X, Y);
       printf("%s-%c-%d-%d\n",temp->data.identifiant,temp->data.carburant,temp->data.consommation);
    }
 }
@@ -205,57 +225,59 @@ void display_arriv()
 //function which display all the flights (departure & arrivals)
 void display_total(int time)
 {
+      int X = 14, Y= 8;
+    printf("\033[%d;%dH", X, Y);
     if(front_dep == NULL)
-      printf("\nThere aren't any planes planned to take off.\n\n");
+      printf("There aren't any planes planned to take off.\n");
     else{
       struct Depart *temp = front_dep;
-      printf("------------DEPARTURE------------\n");
       while(temp->next_dep != NULL){
+          printf("\033[%d;%dH", X, Y);
             printf("%s-%c-%d\n",temp->data.identifiant,temp->data.request,(temp->data.heure)-time);
             temp = temp -> next_dep;
+            X++;                   
                                }
+        printf("\033[%d;%dH", X, Y);
       printf("%s-%c-%d\n",temp->data.identifiant,temp->data.request,(temp->data.heure)-time);
+      
    }
-   if(front_arr == NULL)
-      printf("\nThere aren't any planes planned to land.\n\n");
+   if(front_arr == NULL){
+       X = 27,Y =8;
+      printf("\033[%d;%dH", X, Y);
+      printf("There aren't any planes planned to land.\n\n");
+   }
     else{
+        X = 27,Y =8;
       struct Arrive *temp = front_arr;
-      printf("------------ARRIVAL------------\n");
       while(temp->next_arr != NULL){
-            printf("%s-%d-%d\n",temp->data.identifiant,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation);
+          printf("test");
+           printf("\033[%d;%dH", X, Y);
+            printf("%s-%d-%d-%d\n",temp->data.identifiant,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation,temp->data.heure);
             temp = temp -> next_arr;
-                               }
-      printf("%s-%c-%d-%d\n",temp->data.identifiant,temp->data.request,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation);
+            X++;                   }
+        printf("\033[%d;%dH", X, Y);
+      printf("%s-%c-%d-%d-%d\n",temp->data.identifiant,temp->data.request,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation,temp->data.heure);
    }
 }
 
 //function which prioritize the flights when you enter the ID
-void emergency(int time)
+void emergency(int time,char test[7])
 {
     int check;
-   char toprioritize[7];
-   if(front_arr == NULL)
-      printf("\nPas d'avion en prio.\n");
-   else{
       struct Arrive *temp = front_arr;
-      scanf("%s",&toprioritize);
-      check=strcmp(temp->data.identifiant,toprioritize);
+      check=strcmp(temp->data.identifiant,test);
       while(check!=0)
       {
           temp = temp -> next_arr;
-          check=strcmp(temp->data.identifiant,toprioritize);
+          check=strcmp(temp->data.identifiant,test);
       }
       if(check==0)
       {
-          temp->data.request='U';
-          printf("\nAvion Priorisé: %s\n", temp->data.identifiant);
-            int time = temp->data.heure;
-            printf("%d result Timecheck",TimechekLD((temp->data)));
+            if(Timer(time+1) == 0){
+                temp->data.heure = time+1;
+            }
           
       }
-    temp = front_arr;
-
-   }
 }
 
 //funtion which check with the time if a plane must take off according to its time of takeoff
@@ -312,11 +334,11 @@ void fuel(int time)
         struct Arrive *temp = front_arr;
         while(temp != NULL)
         {
-            if(temp->data.consommation*(((temp->data.heure)-time)<temp->data.carburant))
+            if(temp->data.consommation*((temp->data.heure)-time)>temp->data.carburant)
             {
                 temp->data.request='U';
+                emergency(time,(temp->data.identifiant));
                 break;
-
             }
             else{
                 temp = temp -> next_arr;
@@ -356,14 +378,77 @@ int TimechekLD(avion avion1){
         }
     }
     return 1;
+}
+int Timer(int time){
+    int a =0;
+        if(front_arr !=NULL)
+    {
+        struct Arrive *temp = front_arr;
+        while(temp != NULL)
+        {
+            if((temp->data.heure) == time)
+            {   
+                a = 1;
+            }
+            else{
+                temp = temp -> next_arr;
+                }
+        }
+    }
+       if(front_dep == NULL){
+
+   }
+    else{
+      struct Depart *temp = front_dep;
+      while(temp != NULL){
+            if((temp->data.heure)==time){
+                a = 1;
+            }
+            temp = temp -> next_dep;
    }
 
+}
+return a;
+}
 
-int TTall(avion avion1,int time){
+int TTall(avion avion1){
 if(Timechek(avion1)==1 && TimechekLD(avion1)==1){
     return 1;
 }
 else{
     return 0;
+    }
 }
+void Affichage(){
+    const char * command="cat INETRFACE_AEROPORT.txt";
+    int cr=system(command);
 }
+int ran(){
+    srand( time( NULL ) );
+    int b = (rand() % (3 + 1 - 0)) + 0;
+    }
+void meteo(int time){
+    char tab[4][20]={"Dégagé","Couvert","Ensoleiller","Tempête"};
+    struct Arrive *temp = front_arr;
+    int a = ran();
+    printf("\033[%d;%dH", 18, 91);
+    printf("%s",tab+a);
+    for(int i =1;i<5;i++){
+        if(Timer(time+i) == 1){
+
+        struct Arrive *temp = front_arr;
+        while(temp != NULL)
+        {
+            if((temp->data.heure) == time)
+            {   
+                if(Timer(time+5) == 0){
+                    temp->data.heure = time+5;
+                }
+            }
+            else{
+                temp = temp -> next_arr;
+                }
+        }
+    }
+        }
+    }
