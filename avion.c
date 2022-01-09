@@ -69,8 +69,6 @@ avion addAvionLand(int time){
 
 void insert_depart(avion avion1)
 {
-    FILE * f;
-    f = fopen("file.txt","w");
    struct Depart *newDepart;
    newDepart = (struct Depart*)malloc(sizeof(struct Depart));
    newDepart->data = avion1;
