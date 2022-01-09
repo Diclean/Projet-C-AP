@@ -18,23 +18,23 @@ struct Arrive
 
 struct Liste_Compagnie
 {
-    avion identifiant;
+    avion data;
     struct Liste_Compagnie *next_flight;
 }*front_flight = NULL, *rear_flight = NULL;
 
-void insert_Avion(Compagnie)
 
 avion addAvionTK(int time){
     avion Avion1;
     printf("Immatriculation du véhicule: ");
     scanf("%s", Avion1.identifiant);
-    printf("Depart pour : ");
-    scanf("%d:%d",&Avion1.heure,&Avion1.minute);
-    while(Avion1.heure<=time/60 && Avion1.minute<=time%60);{
+    printf("Depart dans : ");
+    scanf("%d",&Avion1.heure);
+    while(Avion1.heure<=time){
         printf("C'est trop tard\n");
         printf("Entrez un nouvelle horaire xx:xx : ");
-        scanf("%d:%d", &Avion1.heure,&Avion1.minute);
+        scanf("%d:%d", &Avion1.heure);
     }
+    Avion1.timeS = time;
     Avion1.request = 'D';
     return Avion1;
 }
@@ -47,13 +47,15 @@ avion addAvionLand(int time){
     scanf("%d",&Avion1.carburant);
     printf("Consomation en vol : ");
     scanf("%d",&Avion1.consommation);
-    printf("Heure d'attérissage : ");
-        scanf("%d:%d",&Avion1.heure,&Avion1.minute);
-    while(Avion1.heure<=time/60 && Avion1.minute<=time%60);{
+    printf("Heure d'attérissage dans : ");
+    scanf("%d",&Avion1.heure);
+    while(Avion1.heure<=time){
         printf("C'est déjà passé\n");
-        printf("Entrez un nouvelle horaire xx:xx : ");
-        scanf("%d:%d", &Avion1.heure,&Avion1.minute);
+        printf("Entrez de nouveau le timer : ");
+        scanf("%d", &Avion1.heure);
     }
+    Avion1.request = 'L';
+    Avion1.timeS = time;
     return Avion1;
 }
 
@@ -77,26 +79,16 @@ void insert_depart(avion avion1)
           newDepart->next_dep=front_dep;
           front_dep=newDepart;
       }
-
-    if(newDepart->data.heure==front_dep->data.heure)
-      {
-         if(newDepart->data.minute>front_dep->data.minute)
-      {
-          rear_dep -> next_dep = newDepart;
-          rear_dep = newDepart;
-      }
-    if(newDepart->data.minute<front_dep->data.minute)
-      {
-          newDepart->next_dep=front_dep;
-          front_dep=newDepart;
+      else{
+          printf("Ce n'est pas possible\n");
       }
       }
     }
-}
+
 void insert_arriv(avion avion1)
 {
    struct Arrive *newarriv,*temp;
-   newarriv = (struct Depart*)malloc(sizeof(struct Depart));
+   newarriv = (struct Arrive*)malloc(sizeof(struct Arrive));
    newarriv->data = avion1;
    newarriv -> next_arr = NULL;
    if(front_arr == NULL)
@@ -167,7 +159,6 @@ void delete_number_dep()
       if(temp->next_dep==NULL)
       {
           front_dep = front_dep -> next_dep;
-          printf("\nDeleted flight: %s\n", temp->data.identifiant);
           free(temp);
       }
       while(temp->next_dep !=NULL && check!=0)
@@ -181,6 +172,7 @@ void delete_number_dep()
       temp1->next_dep=temp->next_dep;
    }
 }
+
 void display_depart()
 {
    if(front_dep == NULL)
@@ -188,10 +180,10 @@ void display_depart()
    else{
       struct Depart *temp = front_dep;
       while(temp->next_dep != NULL){
-            printf("%s--%d%d\n",temp->data.identifiant,temp->data.heure,temp->data.minute);
+            printf("%s--%d\n",temp->data.identifiant,temp->data.heure);
             temp = temp -> next_dep;
                                }
-      printf("%s-%c-%d%d\n",temp->data.identifiant,temp->data.request,temp->data.heure,temp->data.minute);
+      printf("%s-%c-%d\n",temp->data.identifiant,temp->data.request,temp->data.heure);
    }
 }
 
@@ -211,7 +203,7 @@ void display_arriv()
 }
 
 //function which display all the flights (departure & arrivals)
-void display_total()
+void display_total(int time)
 {
     if(front_dep == NULL)
       printf("\nThere aren't any planes planned to take off.\n\n");
@@ -219,10 +211,10 @@ void display_total()
       struct Depart *temp = front_dep;
       printf("------------DEPARTURE------------\n");
       while(temp->next_dep != NULL){
-            printf("%s-%c-%d%d\n",temp->data.identifiant,temp->data.request,temp->data.heure,temp->data.minute);
+            printf("%s-%c-%d\n",temp->data.identifiant,temp->data.request,(temp->data.heure)-time);
             temp = temp -> next_dep;
                                }
-      printf("%s-%c-%d%d\n",temp->data.identifiant,temp->data.request,temp->data.heure,temp->data.minute);
+      printf("%s-%c-%d\n",temp->data.identifiant,temp->data.request,(temp->data.heure)-time);
    }
    if(front_arr == NULL)
       printf("\nThere aren't any planes planned to land.\n\n");
@@ -230,15 +222,15 @@ void display_total()
       struct Arrive *temp = front_arr;
       printf("------------ARRIVAL------------\n");
       while(temp->next_arr != NULL){
-            printf("%s-%d-%d\n",temp->data.identifiant,temp->data.carburant,temp->data.consommation);
+            printf("%s-%d-%d\n",temp->data.identifiant,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation);
             temp = temp -> next_arr;
                                }
-      printf("%s-%c-%d-%d\n",temp->data.identifiant,temp->data.request,temp->data.carburant,temp->data.consommation);
+      printf("%s-%c-%d-%d\n",temp->data.identifiant,temp->data.request,(temp->data.carburant)-(time-(temp->data.timeS)),temp->data.consommation);
    }
 }
 
 //function which prioritize the flights when you enter the ID
-void emergency()
+void emergency(int time)
 {
     int check;
    char toprioritize[7];
@@ -257,7 +249,11 @@ void emergency()
       {
           temp->data.request='U';
           printf("\nAvion Priorisé: %s\n", temp->data.identifiant);
+            int time = temp->data.heure;
+            printf("%d result Timecheck",TimechekLD((temp->data)));
+          
       }
+    temp = front_arr;
 
    }
 }
@@ -270,7 +266,7 @@ void planning_dep(int time)
         struct Depart *temp = front_dep;
         while(temp != NULL)
         {
-            if(((temp->data.heure)*60)+(temp->data.minute)<=time )
+            if((temp->data.heure)<=time)
             {
 
                 front_dep = front_dep -> next_dep;
@@ -293,7 +289,7 @@ void planning_arr(int time)
         struct Arrive *temp = front_arr;
         while(temp != NULL)
         {
-            if(((temp->data.heure)*60)+(temp->data.minute)<=time )
+            if((temp->data.heure)<=time )
             {
 
                 front_arr = front_arr -> next_arr;
@@ -316,10 +312,9 @@ void fuel(int time)
         struct Arrive *temp = front_arr;
         while(temp != NULL)
         {
-            if(temp->data.consommation*((((temp->data.heure)*60)+(temp->data.minute))-time)<temp->data.carburant)
+            if(temp->data.consommation*(((temp->data.heure)-time)<temp->data.carburant))
             {
                 temp->data.request='U';
-                printf("\nThis flight become a priority to land !: %s\n", temp->data.identifiant);
                 break;
 
             }
@@ -328,4 +323,47 @@ void fuel(int time)
                 }
         }
     }
+}
+
+int Timechek(avion avion1){
+   if(front_dep == NULL){
+    return 1;
+   }
+    else{
+      struct Depart *temp = front_dep;
+      while(temp != NULL){
+            if((temp->data.heure)==(avion1.heure)){
+                return 0;
+            }
+            temp = temp -> next_dep;
+   }
+   return 1;
+}
+}
+int TimechekLD(avion avion1){
+    if(front_arr !=NULL)
+    {
+        struct Arrive *temp = front_arr;
+        while(temp != NULL)
+        {
+            if((temp->data.heure) == (avion1.heure) )
+            {   
+                return 0;
+            }
+            else{
+                temp = temp -> next_arr;
+                }
+        }
+    }
+    return 1;
+   }
+
+
+int TTall(avion avion1,int time){
+if(Timechek(avion1)==1 && TimechekLD(avion1)==1){
+    return 1;
+}
+else{
+    return 0;
+}
 }
